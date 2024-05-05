@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .chat-container {
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .input-area {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .input-area input {
+            flex-grow: 1;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .input-area button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+        .response-box {
+            overflow-y: auto;
+            max-height: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .response-line {
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="response-box" id="responseBox"></div>
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    const responseBox = document.getElementById('responseBox');
+    const messageInput = document.getElementById('messageInput');
+
+    function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "http://localhost:8080/", true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    // Declare and initialize responseLine
+                    const responseLine = document.createElement('p');
+                    responseLine.textContent = xhr.responseText;
+                    responseBox.appendChild(responseLine);
+
+                    // Adjust the size of the response box if necessary
+                    adjustResponseBoxSize();
+
+                    // Fade in the new response line
+                    responseLine.classList.add('fadeIn');
+                } else {
+                    console.error("Error:", xhr.status);
+                    // Optionally, handle the error by displaying a message to the user
+                    const errorLine = document.createElement('p');
+                    errorLine.textContent = "An error occurred. Please try again.";
+                    responseBox.appendChild(errorLine);
+                }
+            }
+        };
+
+        const data = JSON.stringify({ message });
+        xhr.send(data);
+
+        // Clear the input field
+        messageInput.value = '';
+    }
+
+    function adjustResponseBoxSize() {
+        // This is a simplified way to adjust the size of the response box
+        // In a real application, you might want to calculate the height based on the content
+        responseBox.style.maxHeight = '500px'; // Adjust this value as needed
+    }
+
+
+</script>
+
+</body>
+</html>
